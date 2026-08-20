@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.account import Account
-from app.schemas.account import AccountCreate, AccountResponse
 
 router = APIRouter(
     prefix="/accounts",
@@ -11,15 +10,18 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=AccountResponse)
+@router.post("/")
 def create_account(
-    account_data: AccountCreate,
+    account_number: str,
+    name: str,
+    account_type: str,
     db: Session = Depends(get_db)
 ):
+
     account = Account(
-        account_number=account_data.account_number,
-        name=account_data.name,
-        account_type=account_data.account_type
+        account_number=account_number,
+        name=name,
+        account_type=account_type
     )
 
     db.add(account)
