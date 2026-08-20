@@ -6,7 +6,10 @@ from app.models import Account, Transaction
 from app.routes.accounts import router as account_router
 from app.routes.transactions import router as transaction_router
 
+
+# Create database tables
 Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="Fraud Protection System",
@@ -14,6 +17,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+# Register routes
 app.include_router(account_router)
 app.include_router(transaction_router)
 
