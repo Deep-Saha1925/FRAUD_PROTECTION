@@ -1,23 +1,59 @@
-from pydantic import BaseModel
-from decimal import Decimal
+from sqlalchemy import (
+    Column,
+    Integer,
+    Numeric,
+    String,
+    DateTime,
+    ForeignKey
+)
+from sqlalchemy.sql import func
+
+from app.database import Base
 
 
-class TransactionCreate(BaseModel):
-    sender_account_id: int
-    receiver_account_id: int
-    amount: Decimal
-    payment_method: str
-    payment_context: str = "UNKNOWN"
+class Transaction(Base):
 
+    __tablename__ = "transactions"
 
-class TransactionResponse(BaseModel):
-    id: int
-    sender_account_id: int
-    receiver_account_id: int
-    amount: Decimal
-    payment_method: str
-    payment_context: str
-    status: str
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    class Config:
-        from_attributes = True
+    sender_account_id = Column(
+        Integer,
+        ForeignKey("accounts.id"),
+        nullable=False
+    )
+
+    receiver_account_id = Column(
+        Integer,
+        ForeignKey("accounts.id"),
+        nullable=False
+    )
+
+    amount = Column(
+        Numeric(12, 2),
+        nullable=False
+    )
+
+    payment_method = Column(
+        String(30),
+        nullable=False
+    )
+
+    payment_context = Column(
+        String(30),
+        default="UNKNOWN"
+    )
+
+    status = Column(
+        String(20),
+        default="COMPLETED"
+    )
+
+    timestamp = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
