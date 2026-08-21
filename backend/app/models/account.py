@@ -3,7 +3,6 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 
-
 class Account(Base):
 
     __tablename__ = "accounts"
