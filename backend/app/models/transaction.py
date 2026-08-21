@@ -10,7 +10,6 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 
-
 class Transaction(Base):
 
     __tablename__ = "transactions"
