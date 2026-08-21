@@ -18,39 +18,32 @@ class Transaction(Base):
         primary_key=True,
         index=True
     )
-
     sender_account_id = Column(
         Integer,
         ForeignKey("accounts.id"),
         nullable=False
     )
-
     receiver_account_id = Column(
         Integer,
         ForeignKey("accounts.id"),
         nullable=False
     )
-
     amount = Column(
         Numeric(12, 2),
         nullable=False
     )
-
     payment_method = Column(
         String(30),
         nullable=False
     )
-
     payment_context = Column(
         String(30),
         default="UNKNOWN"
     )
-
     status = Column(
         String(20),
         default="COMPLETED"
     )
-
     timestamp = Column(
         DateTime(timezone=True),
         server_default=func.now()
