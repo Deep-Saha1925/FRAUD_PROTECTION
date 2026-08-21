@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Accounts"]
 )
 
-
 @router.post("/")
 def create_account(
     account_number: str,
@@ -23,7 +22,6 @@ def create_account(
         name=name,
         account_type=account_type
     )
-
     db.add(account)
     db.commit()
     db.refresh(account)
