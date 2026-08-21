@@ -10,7 +10,6 @@ router = APIRouter(
     tags=["Transactions"]
 )
 
-
 @router.post("/")
 def create_transaction(
     sender_account_id: int,
@@ -34,7 +33,6 @@ def create_transaction(
             status_code=404,
             detail="Sender account not found"
         )
-
     if not receiver:
         raise HTTPException(
             status_code=404,
