@@ -62,51 +62,49 @@ def download_apk():
 
 @app.get("/security-update", response_class=HTMLResponse)
 def security_update_page():
+
+    events.append({
+        "demo_id": "DEMO-001",
+        "platform": "Android",
+        "app_version": "WEB",
+        "event": "LINK_OPENED",
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
     return """
     <!DOCTYPE html>
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Security Update</title>
+
         <style>
             body {
-                font-family: Arial, sans-serif;
+                font-family: Arial;
                 background: #f4f6f8;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 min-height: 100vh;
-                margin: 0;
             }
 
             .card {
                 background: white;
-                width: 90%;
-                max-width: 420px;
                 padding: 30px;
                 border-radius: 16px;
-                box-shadow: 0 4px 20px rgba(0,0,0,.15);
+                max-width: 420px;
                 text-align: center;
+                box-shadow: 0 4px 20px rgba(0,0,0,.15);
             }
 
             .icon {
                 font-size: 55px;
             }
 
-            h1 {
-                color: #222;
-            }
-
-            p {
-                color: #555;
-                line-height: 1.6;
-            }
-
             .warning {
                 background: #fff3cd;
                 padding: 12px;
                 border-radius: 8px;
-                font-size: 14px;
             }
 
             a {
@@ -118,12 +116,6 @@ def security_update_page():
                 text-decoration: none;
                 margin-top: 20px;
                 font-weight: bold;
-            }
-
-            .demo {
-                margin-top: 20px;
-                font-size: 12px;
-                color: #777;
             }
         </style>
     </head>
@@ -138,27 +130,18 @@ def security_update_page():
 
             <p>
                 A security update is available for your Android device.
-                Install the latest security component to continue using
-                protected services.
             </p>
 
             <div class="warning">
-                ⚠️ This demonstration shows how a malicious link can
-                convince a user to download an application.
+                ⚠️ CYBERSHIELD SECURITY DEMONSTRATION
             </div>
 
             <a href="/download-apk">
                 Download Security Update
             </a>
 
-            <div class="demo">
-                CYBERSHIELD SECURITY DEMONSTRATION
-            </div>
-
         </div>
 
     </body>
     </html>
     """
-
-
