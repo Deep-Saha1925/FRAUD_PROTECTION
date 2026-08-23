@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from fastapi.responses import FileResponse, HTMLResponse
 from pathlib import Path
+import uuid
 
 app = FastAPI(title="CyberShield Security")
 
@@ -19,6 +20,7 @@ class DemoEvent(BaseModel):
     platform: str
     app_version: str
     event: str
+    device: str = "Unknown"
 
 
 # Temporary storage for demonstration
@@ -54,6 +56,23 @@ def root():
         "message": "CyberShield Security API is running"
     }
 
+@app.get("/api/demo/events")
+def get_events():
+
+    return {
+        "total": len(events),
+        "events": events
+    }
+
+@app.delete("/api/demo/events")
+def clear_events():
+
+    events.clear()
+
+    return {
+        "success": True,
+        "message": "Demo events cleared"
+    }
 
 # =========================
 # RECEIVE ANDROID EVENT
@@ -68,6 +87,7 @@ async def receive_demo_event(
     client_ip = get_client_ip(request)
 
     event = {
+        "id": str(uuid.uuid4())[:8],
         "demo_id": data.demo_id,
         "platform": data.platform,
         "app_version": data.app_version,
