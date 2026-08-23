@@ -37,18 +37,24 @@ async def receive_demo_event(
         "platform": data.platform,
         "app_version": data.app_version,
         "event": data.event,
+        "ip": client_ip,
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     events.append(event)
 
     print("\n========== SECURITY EVENT ==========")
-    print(event)
+    print("Event:", data.event)
+    print("Demo ID:", data.demo_id)
+    print("Platform:", data.platform)
+    print("IP:", client_ip)
+    print("Time:", event["time"])
     print("====================================\n")
 
     return {
         "success": True,
-        "message": "Demo event received"
+        "message": "Demo event received",
+        "event": data.event
     }
 
 @app.get("/download-apk")
