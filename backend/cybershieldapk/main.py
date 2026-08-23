@@ -82,6 +82,8 @@ def security_update_page():
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
+    print(events)
+
     return """
     <!DOCTYPE html>
     <html>
