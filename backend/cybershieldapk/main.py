@@ -72,17 +72,21 @@ def download_apk():
     )
 
 @app.get("/security-update", response_class=HTMLResponse)
-def security_update_page():
+def security_update_page(
+    data: DemoEvent,
+    request: Request
+):
+
+    client_ip = request.client.host if request.client else "UNKNOWN"
 
     events.append({
-        "demo_id": "DEMO-001",
-        "platform": "Android",
-        "app_version": "WEB",
-        "event": "LINK_OPENED",
+        "demo_id": data.demo_id,
+        "platform": data.platform,
+        "app_version": data.app_version,
+        "event": data.event,
+        "ip": client_ip,
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
-
-    print(events)
 
     return """
     <!DOCTYPE html>
@@ -168,6 +172,8 @@ def dashboard():
         rows += f"""
         <tr>
             <td>{event["time"]}</td>
+            <td>{event["app_version"]}</td>
+            <td>{event["ip"]}</td>
             <td>{event["event"]}</td>
             <td>{event["platform"]}</td>
             <td>{event["demo_id"]}</td>
@@ -231,6 +237,8 @@ def dashboard():
         <table>
             <tr>
                 <th>Time</th>
+                <th>App version</th>
+                <th>DEVICE IP</th>
                 <th>Event</th>
                 <th>Platform</th>
                 <th>Demo ID</th>
