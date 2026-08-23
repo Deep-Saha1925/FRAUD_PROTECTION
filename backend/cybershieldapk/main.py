@@ -47,3 +47,9 @@ def download_apk():
             "error": "Demo APK not found",
             "expected_path": str(APK_PATH)
         }
+
+    return FileResponse(
+        path=APK_PATH,
+        media_type="application/vnd.android.package-archieve",
+        filename="CyberShieldAPK.apk"
+    )
