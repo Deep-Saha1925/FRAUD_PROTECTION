@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi.responses import FileResponse, HTMLResponse
@@ -25,7 +25,12 @@ def root():
 
 
 @app.post("/api/demo/event")
-def receive_demo_event(data: DemoEvent):
+async def receive_demo_event(
+    data: DemoEvent,
+    request: Request
+):
+
+    client_ip = request.client.host if request.client else "UNKNOWN"
 
     event = {
         "demo_id": data.demo_id,
