@@ -16,11 +16,17 @@ APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 # =========================
 
 class DemoEvent(BaseModel):
-    demo_id: str
-    platform: str
-    app_version: str
     event: str
-    device: str = "Unknown"
+
+    device_manufacturer: str = "Unknown"
+    device_model: str = "Unknown"
+    android_version: str = "Unknown"
+    android_sdk: int = 0
+
+    battery_percent: int = -1
+
+    locale: str = "Unknown"
+    timezone: str = "Unknown"
 
 
 # Temporary storage for demonstration
