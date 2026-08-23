@@ -145,3 +145,88 @@ def security_update_page():
     </body>
     </html>
     """
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard():
+
+    rows = ""
+
+    for event in events:
+        rows += f"""
+        <tr>
+            <td>{event["time"]}</td>
+            <td>{event["event"]}</td>
+            <td>{event["platform"]}</td>
+            <td>{event["demo_id"]}</td>
+        </tr>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CyberShield Dashboard</title>
+
+        <style>
+            body {{
+                font-family: Arial;
+                background: #101820;
+                color: white;
+                padding: 30px;
+            }}
+
+            h1 {{
+                text-align: center;
+            }}
+
+            .status {{
+                text-align: center;
+                padding: 15px;
+                margin: 20px;
+                background: #1f2937;
+                border-radius: 10px;
+            }}
+
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                background: #ffffff;
+                color: #111;
+            }}
+
+            th, td {{
+                padding: 14px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }}
+
+            th {{
+                background: #1565c0;
+                color: white;
+            }}
+        </style>
+    </head>
+
+    <body>
+
+        <h1>🛡️ CyberShield Security Dashboard</h1>
+
+        <div class="status">
+            🚨 DEMONSTRATION MONITORING ACTIVE
+        </div>
+
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Platform</th>
+                <th>Demo ID</th>
+            </tr>
+
+            {rows}
+
+        </table>
+
+    </body>
+    </html>
+    """
