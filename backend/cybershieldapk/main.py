@@ -27,13 +27,19 @@ def root():
 @app.post("/api/demo/event")
 def receive_demo_event(data: DemoEvent):
 
-    print("\n========== DEMO EVENT ==========")
-    print("Demo ID:", data.demo_id)
-    print("Platform:", data.platform)
-    print("App Version:", data.app_version)
-    print("Event:", data.event)
-    print("Received:", datetime.now())
-    print("================================\n")
+    event = {
+        "demo_id": data.demo_id,
+        "platform": data.platform,
+        "app_version": data.app_version,
+        "event": data.event,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    events.append(event)
+
+    print("\n========== SECURITY EVENT ==========")
+    print(event)
+    print("====================================\n")
 
     return {
         "success": True,
