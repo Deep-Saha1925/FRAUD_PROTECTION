@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pathlib import Path
-from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="CyberShield Security Demo")
+app = FastAPI(title="CyberShield Security")
 
 BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
@@ -16,11 +15,12 @@ class DemoEvent(BaseModel):
     app_version: str
     event: str
 
+events = []
 
 @app.get("/")
 def root():
     return {
-        "message": "CyberShield Security Demo API is running"
+        "message": "CyberShield Security API is running"
     }
 
 
@@ -154,3 +154,5 @@ def security_update_page():
     </body>
     </html>
     """
+
+
