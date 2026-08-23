@@ -4,6 +4,7 @@ from datetime import datetime
 from fastapi.responses import FileResponse, HTMLResponse
 from pathlib import Path
 import uuid
+import html
 
 app = FastAPI(title="CyberShield Security")
 
@@ -11,15 +12,17 @@ BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
 
-# =========================
+# ============================================================
 # DATA MODEL
-# =========================
+# ============================================================
 
 class DemoEvent(BaseModel):
+
     event: str
 
     device_manufacturer: str = "Unknown"
     device_model: str = "Unknown"
+
     android_version: str = "Unknown"
     android_sdk: int = 0
 
@@ -29,31 +32,32 @@ class DemoEvent(BaseModel):
     timezone: str = "Unknown"
 
 
-# Temporary storage for demonstration
+# Temporary in-memory storage
 events = []
 
 
-# =========================
-# HELPER
-# =========================
+# ============================================================
+# HELPER - GET CLIENT IP
+# ============================================================
 
 def get_client_ip(request: Request):
 
-    # Render/reverse proxy may forward the original client IP
     forwarded_for = request.headers.get("x-forwarded-for")
 
     if forwarded_for:
+
         return forwarded_for.split(",")[0].strip()
 
     if request.client:
+
         return request.client.host
 
     return "UNKNOWN"
 
 
-# =========================
+# ============================================================
 # ROOT
-# =========================
+# ============================================================
 
 @app.get("/")
 def root():
@@ -62,6 +66,11 @@ def root():
         "message": "CyberShield Security API is running"
     }
 
+
+# ============================================================
+# GET ALL EVENTS
+# ============================================================
+
 @app.get("/api/demo/events")
 def get_events():
 
@@ -69,6 +78,11 @@ def get_events():
         "total": len(events),
         "events": events
     }
+
+
+# ============================================================
+# CLEAR EVENTS
+# ============================================================
 
 @app.delete("/api/demo/events")
 def clear_events():
@@ -80,9 +94,10 @@ def clear_events():
         "message": "Demo events cleared"
     }
 
-# =========================
+
+# ============================================================
 # RECEIVE ANDROID EVENT
-# =========================
+# ============================================================
 
 @app.post("/api/demo/event")
 async def receive_demo_event(
@@ -93,37 +108,98 @@ async def receive_demo_event(
     client_ip = get_client_ip(request)
 
     event = {
+
         "id": str(uuid.uuid4())[:8],
-        "demo_id": data.demo_id,
-        "platform": data.platform,
-        "app_version": data.app_version,
+
         "event": data.event,
-        "ip": client_ip,
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        "device_manufacturer":
+            data.device_manufacturer,
+
+        "device_model":
+            data.device_model,
+
+        "android_version":
+            data.android_version,
+
+        "android_sdk":
+            data.android_sdk,
+
+        "battery_percent":
+            data.battery_percent,
+
+        "locale":
+            data.locale,
+
+        "timezone":
+            data.timezone,
+
+        "ip":
+            client_ip,
+
+        "time":
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
     }
 
     events.append(event)
 
+
+    # ========================================================
+    # SERVER CONSOLE
+    # ========================================================
+
     print("\n========== SECURITY EVENT ==========")
-    print("Event:", data.event)
-    print("Demo ID:", data.demo_id)
-    print("Platform:", data.platform)
-    print("App Version:", data.app_version)
-    print("IP:", client_ip)
-    print("Time:", event["time"])
+
+    print("Event:",
+          data.event)
+
+    print("Device:",
+          f"{data.device_manufacturer} {data.device_model}")
+
+    print("Android:",
+          data.android_version)
+
+    print("SDK:",
+          data.android_sdk)
+
+    print("Battery:",
+          f"{data.battery_percent}%")
+
+    print("Locale:",
+          data.locale)
+
+    print("Timezone:",
+          data.timezone)
+
+    print("IP:",
+          client_ip)
+
+    print("Time:",
+          event["time"])
+
     print("====================================\n")
 
+
     return {
+
         "success": True,
-        "message": "Demo event received",
-        "event": data.event,
-        "demo_id": data.demo_id
+
+        "message":
+            "Demo event received",
+
+        "event":
+            data.event,
+
+        "event_id":
+            event["id"]
     }
 
 
-# =========================
+# ============================================================
 # DOWNLOAD APK
-# =========================
+# ============================================================
 
 @app.get("/download-apk")
 def download_apk():
@@ -131,51 +207,76 @@ def download_apk():
     if not APK_PATH.exists():
 
         return {
-            "error": "Demo APK not found",
-            "expected_path": str(APK_PATH)
+
+            "error":
+                "Demo APK not found",
+
+            "expected_path":
+                str(APK_PATH)
         }
 
     return FileResponse(
+
         path=APK_PATH,
-        media_type="application/vnd.android.package-archive",
-        filename="CyberShieldAPK.apk"
+
+        media_type=
+            "application/vnd.android.package-archive",
+
+        filename=
+            "CyberShieldAPK.apk"
     )
 
 
-# =========================
+# ============================================================
 # SECURITY UPDATE PAGE
-# =========================
+# ============================================================
 
-@app.get("/security-update", response_class=HTMLResponse)
+@app.get(
+    "/security-update",
+    response_class=HTMLResponse
+)
 def security_update_page():
 
     return """
+
     <!DOCTYPE html>
 
     <html>
 
     <head>
 
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
+        <meta
+            name="viewport"
+            content="width=device-width,
+                     initial-scale=1.0">
 
-        <title>Security Update</title>
+        <title>
+            Security Update
+        </title>
+
 
         <style>
 
             body {
+
                 font-family: Arial;
+
                 background: #f4f6f8;
 
                 display: flex;
+
                 justify-content: center;
+
                 align-items: center;
 
                 min-height: 100vh;
 
                 margin: 0;
+
                 padding: 20px;
+
             }
+
 
             .card {
 
@@ -190,14 +291,18 @@ def security_update_page():
                 text-align: center;
 
                 box-shadow:
-                    0 4px 20px rgba(0,0,0,.15);
+                    0 4px 20px
+                    rgba(0,0,0,.15);
+
             }
+
 
             .icon {
 
                 font-size: 55px;
 
             }
+
 
             .warning {
 
@@ -208,7 +313,9 @@ def security_update_page():
                 border-radius: 8px;
 
                 margin-top: 15px;
+
             }
+
 
             a {
 
@@ -242,16 +349,12 @@ def security_update_page():
 
 
             <div class="icon">
-
                 🔒
-
             </div>
 
 
             <h1>
-
                 Security Update Required
-
             </h1>
 
 
@@ -284,45 +387,101 @@ def security_update_page():
     </body>
 
     </html>
+
     """
 
 
-# =========================
+# ============================================================
 # DASHBOARD
-# =========================
+# ============================================================
 
-@app.get("/dashboard", response_class=HTMLResponse)
+@app.get(
+    "/dashboard",
+    response_class=HTMLResponse
+)
 def dashboard():
 
     rows = ""
 
+
     for event in events:
 
         rows += f"""
+
         <tr>
 
-            <td>{event["time"]}</td>
+            <td>
+                {html.escape(str(event["time"]))}
+            </td>
 
-            <td>{event["app_version"]}</td>
+            <td>
+                {html.escape(str(event["event"]))}
+            </td>
 
-            <td>{event["ip"]}</td>
+            <td>
+                {html.escape(
+                    str(event["device_manufacturer"])
+                )}
+                <br>
 
-            <td>{event["event"]}</td>
+                <b>
+                    {html.escape(
+                        str(event["device_model"])
+                    )}
+                </b>
+            </td>
 
-            <td>{event["platform"]}</td>
+            <td>
+                Android
+                {html.escape(
+                    str(event["android_version"])
+                )}
+                <br>
+                SDK:
+                {event["android_sdk"]}
+            </td>
 
-            <td>{event["demo_id"]}</td>
+            <td>
+                {event["battery_percent"]}%
+            </td>
+
+            <td>
+                {html.escape(
+                    str(event["ip"])
+                )}
+            </td>
+
+            <td>
+                {html.escape(
+                    str(event["locale"])
+                )}
+            </td>
+
+            <td>
+                {html.escape(
+                    str(event["timezone"])
+                )}
+            </td>
+
+            <td>
+                {html.escape(
+                    str(event["id"])
+                )}
+            </td>
 
         </tr>
+
         """
 
 
     if not rows:
 
         rows = """
+
         <tr>
 
-            <td colspan="6"
+            <td
+                colspan="9"
                 style="text-align:center">
 
                 No events received yet.
@@ -330,6 +489,7 @@ def dashboard():
             </td>
 
         </tr>
+
         """
 
 
@@ -345,8 +505,16 @@ def dashboard():
             CyberShield Dashboard
         </title>
 
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
+
+        <meta
+            name="viewport"
+            content="width=device-width,
+                     initial-scale=1.0">
+
+
+        <meta
+            http-equiv="refresh"
+            content="5">
 
 
         <style>
@@ -386,6 +554,43 @@ def dashboard():
             }}
 
 
+            .stats {{
+
+                display: flex;
+
+                justify-content: center;
+
+                gap: 20px;
+
+                margin-bottom: 25px;
+
+            }}
+
+
+            .stat {{
+
+                background: #1f2937;
+
+                padding: 20px;
+
+                border-radius: 10px;
+
+                text-align: center;
+
+                min-width: 120px;
+
+            }}
+
+
+            .number {{
+
+                font-size: 28px;
+
+                font-weight: bold;
+
+            }}
+
+
             .table-container {{
 
                 overflow-x: auto;
@@ -403,18 +608,18 @@ def dashboard():
 
                 color: #111;
 
+                min-width: 1000px;
+
             }}
 
 
             th, td {{
 
-                padding: 14px;
+                padding: 12px;
 
                 border: 1px solid #ddd;
 
                 text-align: left;
-
-                white-space: nowrap;
 
             }}
 
@@ -446,32 +651,84 @@ def dashboard():
 
             🚨 DEMONSTRATION MONITORING ACTIVE
 
+            <br>
+
+            Auto-refresh: 5 seconds
+
+        </div>
+
+
+        <div class="stats">
+
+
+            <div class="stat">
+
+                <div class="number">
+
+                    {len(events)}
+
+                </div>
+
+                Events
+
+            </div>
+
+
         </div>
 
 
         <div class="table-container">
 
+
             <table>
+
 
                 <tr>
 
-                    <th>Time</th>
+                    <th>
+                        Time
+                    </th>
 
-                    <th>App Version</th>
+                    <th>
+                        Event
+                    </th>
 
-                    <th>DEVICE IP</th>
+                    <th>
+                        Device
+                    </th>
 
-                    <th>Event</th>
+                    <th>
+                        Android
+                    </th>
 
-                    <th>Platform</th>
+                    <th>
+                        Battery
+                    </th>
 
-                    <th>Demo ID</th>
+                    <th>
+                        Network IP
+                    </th>
+
+                    <th>
+                        Locale
+                    </th>
+
+                    <th>
+                        Timezone
+                    </th>
+
+                    <th>
+                        Event ID
+                    </th>
 
                 </tr>
 
+
                 {rows}
 
+
             </table>
+
 
         </div>
 
