@@ -19,7 +19,7 @@ class DemoEvent(BaseModel):
     event: str
 
     device_manufacturer: str = "Unknown"
-    device_model: str = "Unknown"
+    device: str = "Unknown"
 
     android_version: str = "Unknown"
     android_sdk: int = 0
@@ -104,8 +104,8 @@ async def receive_demo_event(
         "device_manufacturer":
             data.device_manufacturer,
 
-        "device_model":
-            data.device_model,
+        "device":
+            data.device,
 
         "android_version":
             data.android_version,
@@ -141,7 +141,7 @@ async def receive_demo_event(
           data.event)
 
     print("Device:",
-          f"{data.device_manufacturer} {data.device_model}")
+          f"{data.device_manufacturer} {data.device}")
 
     print("Android:",
           data.android_version)
@@ -404,7 +404,7 @@ def dashboard():
 
                 <b>
                     {html.escape(
-                        str(event["device_model"])
+                        str(event["device"])
                     )}
                 </b>
             </td>
