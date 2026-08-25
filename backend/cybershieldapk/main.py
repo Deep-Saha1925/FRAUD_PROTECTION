@@ -749,10 +749,6 @@ def security_update_page(request: Request):
                 }}
 
 
-                // =================================================
-                // MODERN USER AGENT DATA
-                // =================================================
-
                 if (
                     navigator.userAgentData &&
                     navigator.userAgentData.getHighEntropyValues
@@ -801,10 +797,6 @@ def security_update_page(request: Request):
                 }}
 
 
-                // =================================================
-                // TIMEZONE
-                // =================================================
-
                 try {{
 
                     timezone =
@@ -819,10 +811,6 @@ def security_update_page(request: Request):
 
                 }}
 
-
-                // =================================================
-                // BATTERY
-                // =================================================
 
                 if (navigator.getBattery) {{
 
@@ -844,10 +832,6 @@ def security_update_page(request: Request):
 
                 }}
 
-
-                // =================================================
-                // SEND DATA TO SAME EVENT
-                // =================================================
 
                 const response =
                     await fetch(
@@ -914,11 +898,6 @@ def security_update_page(request: Request):
 
         }}
 
-
-        // ====================================================
-        // START COLLECTION
-        // ====================================================
-
         collectDeviceInformation();
 
         </script>
@@ -930,10 +909,7 @@ def security_update_page(request: Request):
 
     """
 
-
-# ============================================================
 # DASHBOARD
-# ============================================================
 
 @app.get(
     "/dashboard",
