@@ -6,17 +6,13 @@ from pathlib import Path
 import uuid
 import html
 
-
 app = FastAPI(title="CyberShield Security")
-
 
 BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
 
-# ============================================================
 # DATA MODEL
-# ============================================================
 
 class DemoEvent(BaseModel):
 
@@ -33,18 +29,10 @@ class DemoEvent(BaseModel):
     locale: str = "Unknown"
     timezone: str = "Unknown"
 
-
-# ============================================================
-# TEMPORARY IN-MEMORY STORAGE
-# ============================================================
-
 events = []
 
 
-# ============================================================
-# HELPER - GET CLIENT IP
-# ============================================================
-
+# HELPER - GET CLIENT I
 def get_client_ip(request: Request):
 
     forwarded_for = request.headers.get("x-forwarded-for")
