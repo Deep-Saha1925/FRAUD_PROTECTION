@@ -72,9 +72,7 @@ def get_events():
     }
 
 
-# ============================================================
 # CLEAR EVENTS
-# ============================================================
 
 @app.delete("/api/demo/events")
 def clear_events():
@@ -87,9 +85,7 @@ def clear_events():
     }
 
 
-# ============================================================
 # RECEIVE ANDROID EVENT
-# ============================================================
 
 @app.post("/api/demo/event")
 async def receive_demo_event(
