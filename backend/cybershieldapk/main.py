@@ -352,9 +352,7 @@ async def receive_demo_event(
     }
 
 
-# ============================================================
 # DOWNLOAD APK
-# ============================================================
 
 @app.get("/download-apk")
 def download_apk():
@@ -383,20 +381,12 @@ def download_apk():
 
     )
 
-
-# ============================================================
 # SECURITY UPDATE PAGE
-# ============================================================
-
 @app.get(
     "/security-update",
     response_class=HTMLResponse
 )
 def security_update_page(request: Request):
-
-    # --------------------------------------------------------
-    # GET INFORMATION AVAILABLE DIRECTLY FROM HTTP REQUEST
-    # --------------------------------------------------------
 
     client_ip = get_client_ip(request)
 
