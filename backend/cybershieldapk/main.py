@@ -34,9 +34,7 @@ class DemoEvent(BaseModel):
 events = []
 
 
-# ============================================================
 # HELPER - GET CLIENT IP
-# ============================================================
 
 def get_client_ip(request: Request):
 
