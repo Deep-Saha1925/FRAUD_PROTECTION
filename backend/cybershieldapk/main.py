@@ -105,12 +105,7 @@ def extract_device_info(user_agent: str):
     device = "Unknown"
 
     try:
-
-        # Common Android User-Agent example:
-        #
-        # Mozilla/5.0 (Linux; Android 13; SM-A525F)
-        # AppleWebKit/537.36 ...
-        #
+       
         if "Android" in user_agent:
 
             android_part = user_agent.split("Android", 1)[1]
@@ -175,9 +170,7 @@ def extract_device_info(user_agent: str):
     return manufacturer, device
 
 
-# ============================================================
 # ROOT
-# ============================================================
 
 @app.get("/")
 def root():
