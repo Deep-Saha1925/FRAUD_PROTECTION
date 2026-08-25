@@ -85,9 +85,6 @@ def get_events():
     }
 
 
-# ============================================================
-# CLEAR EVENTS
-# ============================================================
 
 @app.delete("/api/demo/events")
 def clear_events():
@@ -99,10 +96,6 @@ def clear_events():
         "message": "Demo events cleared"
     }
 
-
-# ============================================================
-# RECEIVE AND UPDATE DEVICE INFORMATION
-# ============================================================
 
 @app.post("/api/demo/event/{event_id}")
 async def update_demo_event(
@@ -206,10 +199,6 @@ async def update_demo_event(
         "message": "Event not found"
     }
 
-
-# ============================================================
-# ORIGINAL ANDROID EVENT ENDPOINT
-# ============================================================
 
 @app.post("/api/demo/event")
 async def receive_demo_event(
@@ -326,10 +315,6 @@ async def receive_demo_event(
     }
 
 
-# ============================================================
-# DOWNLOAD APK
-# ============================================================
-
 @app.get("/download-apk")
 def download_apk():
 
@@ -356,19 +341,11 @@ def download_apk():
     )
 
 
-# ============================================================
-# SECURITY UPDATE PAGE
-# ============================================================
-
 @app.get(
     "/security-update",
     response_class=HTMLResponse
 )
 def security_update_page(request: Request):
-
-    # ========================================================
-    # CREATE ONE EVENT
-    # ========================================================
 
     client_ip = get_client_ip(request)
 
@@ -430,10 +407,6 @@ def security_update_page(request: Request):
 
     print("=================================\n")
 
-
-    # ========================================================
-    # SECURITY UPDATE PAGE
-    # ========================================================
 
     return f"""
 
