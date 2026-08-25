@@ -12,9 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
 
-# ============================================================
 # DATA MODEL
-# ============================================================
 
 class DemoEvent(BaseModel):
 
@@ -145,10 +143,7 @@ async def receive_demo_event(
 
     events.append(event)
 
-
-    # ========================================================
     # SERVER CONSOLE
-    # ========================================================
 
     print("\n========== SECURITY EVENT ==========")
 
