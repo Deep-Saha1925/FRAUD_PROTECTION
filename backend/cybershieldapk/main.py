@@ -60,9 +60,7 @@ def get_client_ip(request: Request):
     return "UNKNOWN"
 
 
-# ============================================================
 # HELPER - GET ANDROID VERSION
-# ============================================================
 
 def extract_android_version(user_agent: str):
 
@@ -95,9 +93,7 @@ def extract_android_version(user_agent: str):
     return "Unknown"
 
 
-# ============================================================
 # HELPER - GET DEVICE INFORMATION
-# ============================================================
 
 def extract_device_info(user_agent: str):
 
