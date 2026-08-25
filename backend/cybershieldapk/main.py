@@ -6,17 +6,11 @@ from pathlib import Path
 import uuid
 import html
 
-
 app = FastAPI(title="CyberShield Security")
-
 
 BASE_DIR = Path(__file__).resolve().parent
 APK_PATH = BASE_DIR / "demo_files" / "CyberShieldAPK.apk"
 
-
-# ============================================================
-# DATA MODEL
-# ============================================================
 
 class DemoEvent(BaseModel):
 
@@ -34,16 +28,7 @@ class DemoEvent(BaseModel):
     timezone: str = "Unknown"
 
 
-# ============================================================
-# TEMPORARY STORAGE
-# ============================================================
-
 events = []
-
-
-# ============================================================
-# GET CLIENT IP
-# ============================================================
 
 def get_client_ip(request: Request):
 
@@ -59,11 +44,6 @@ def get_client_ip(request: Request):
 
     return "UNKNOWN"
 
-
-# ============================================================
-# ROOT
-# ============================================================
-
 @app.get("/")
 def root():
 
@@ -71,10 +51,6 @@ def root():
         "message": "CyberShield Security API is running"
     }
 
-
-# ============================================================
-# GET ALL EVENTS
-# ============================================================
 
 @app.get("/api/demo/events")
 def get_events():
